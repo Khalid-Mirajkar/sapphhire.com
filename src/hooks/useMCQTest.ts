@@ -43,7 +43,7 @@ export const useMCQTest = () => {
   const [remainingSeconds, setRemainingSeconds] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!companyName || !jobTitle) {

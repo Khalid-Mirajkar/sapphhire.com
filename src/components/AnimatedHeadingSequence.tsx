@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const phrases = [
@@ -31,7 +31,7 @@ const AnimatedHeadingSequence = () => {
   }, []);
   
   // Variants for the animation - slightly slower for better readability
-  const variants = {
+  const variants: Variants = {
     enter: { 
       y: 20, 
       opacity: 0 
@@ -55,7 +55,7 @@ const AnimatedHeadingSequence = () => {
   };
 
   // Special variants for the final "Get Hired" phrase
-  const finalPhraseVariants = {
+  const finalPhraseVariants: Variants = {
     ...variants,
     visible: {
       ...variants.visible,

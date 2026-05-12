@@ -5,21 +5,24 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import ParticlesBackground from "@/components/ParticlesBackground";
 import FeatureCard from "@/components/FeatureCard";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import ProcessSection from "@/components/ProcessSection";
 import { Button } from "@/components/ui/button";
 import GlowingButton from "@/components/GlowingButton";
 import PageTransition from "@/components/PageTransition";
-import CustomLoader from "@/components/CustomLoader";
 import AnimatedHeadingSequence from "@/components/AnimatedHeadingSequence";
+import { useSEO } from "@/hooks/useSEO";
 
 const Index = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useSEO({
+    title: "Sapphhire · AI-powered interview practice",
+    description: "Practise role-specific interview questions with AI feedback, analytics, and realistic simulations tailored to your dream job.",
+  });
   
   // References for scroll animations
   const heroRef = useRef<HTMLDivElement>(null);
@@ -31,16 +34,7 @@ const Index = () => {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
-  
-  useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -81,14 +75,6 @@ const Index = () => {
       description: "Practice in real-world scenarios built for your dream job."
     }
   ];
-
-  if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-[#0D0D0D]">
-        <CustomLoader size="lg" text="Preparing Interview Simulator" />
-      </div>
-    );
-  }
 
   return (
     <PageTransition>

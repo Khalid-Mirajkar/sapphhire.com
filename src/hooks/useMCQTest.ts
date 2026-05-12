@@ -10,15 +10,24 @@ import { useQueryClient } from "@tanstack/react-query";
 export const useMCQTest = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const params = useParams();
-  const [searchParams] = useSearchParams();
-  
-  // Get data from URL params first, then fallback to location state
-  const companyName = params.companyName ? decodeURIComponent(params.companyName) : location.state?.companyName;
-  const jobTitle = params.jobTitle ? decodeURIComponent(params.jobTitle) : location.state?.jobTitle;
-  const numberOfQuestions = searchParams.get('numberOfQuestions') || location.state?.numberOfQuestions || '15';
-  const difficulty = searchParams.get('difficulty') || location.state?.difficulty || 'intermediate';
-  const companyLogo = searchParams.get('companyLogo') || location.state?.companyLogo;
+
+  // Get data from router state, falling back to the persisted session in
+  // localStorage so refreshes don't break the test.
+  const stateData = (location.state as Record<string, string> | null) ?? null;
+  let stored: Record<string, string> | null = null;
+  if (!stateData?.companyName || !stateData?.jobTitle) {
+    try {
+      const raw = localStorage.getItem('testData');
+      stored = raw ? JSON.parse(raw) : null;
+    } catch {
+      stored = null;
+    }
+  }
+  const source = stateData?.companyName ? stateData : stored;
+
+  const companyName = source?.companyName;
+  const jobTitle = source?.jobTitle;
+  const numberOfQuestions = source?.numberOfQuestions || '15';
   
   const { toast } = useToast();
   const { user } = useAuth();

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MCQQuestion, TestResult } from "@/types/mcq";
@@ -10,15 +10,24 @@ import { useQueryClient } from "@tanstack/react-query";
 export const useMCQTest = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const params = useParams();
-  const [searchParams] = useSearchParams();
-  
-  // Get data from URL params first, then fallback to location state
-  const companyName = params.companyName ? decodeURIComponent(params.companyName) : location.state?.companyName;
-  const jobTitle = params.jobTitle ? decodeURIComponent(params.jobTitle) : location.state?.jobTitle;
-  const numberOfQuestions = searchParams.get('numberOfQuestions') || location.state?.numberOfQuestions || '15';
-  const difficulty = searchParams.get('difficulty') || location.state?.difficulty || 'intermediate';
-  const companyLogo = searchParams.get('companyLogo') || location.state?.companyLogo;
+
+  // Get data from router state, falling back to the persisted session in
+  // localStorage so refreshes don't break the test.
+  const stateData = (location.state as Record<string, string> | null) ?? null;
+  let stored: Record<string, string> | null = null;
+  if (!stateData?.companyName || !stateData?.jobTitle) {
+    try {
+      const raw = localStorage.getItem('testData');
+      stored = raw ? JSON.parse(raw) : null;
+    } catch {
+      stored = null;
+    }
+  }
+  const source = stateData?.companyName ? stateData : stored;
+
+  const companyName = source?.companyName;
+  const jobTitle = source?.jobTitle;
+  const numberOfQuestions = source?.numberOfQuestions || '15';
   
   const { toast } = useToast();
   const { user } = useAuth();
@@ -43,7 +52,7 @@ export const useMCQTest = () => {
   const [remainingSeconds, setRemainingSeconds] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!companyName || !jobTitle) {

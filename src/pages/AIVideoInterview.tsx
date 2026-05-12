@@ -1,14 +1,9 @@
 
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import AIInterviewSession from '@/components/AIInterviewSession';
 import AIInterviewResults from '@/components/AIInterviewResults';
-
-interface LocationState {
-  companyName: string;
-  jobTitle: string;
-  companyLogo?: string;
-}
+import { useTestSession } from '@/hooks/useTestSession';
+import { useSEO } from '@/hooks/useSEO';
 
 interface InterviewResponse {
   questionId: number;
@@ -20,28 +15,19 @@ interface InterviewResponse {
 }
 
 const AIVideoInterview = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { data: session } = useTestSession();
   const [interviewCompleted, setInterviewCompleted] = useState(false);
   const [interviewResults, setInterviewResults] = useState<{
     responses: InterviewResponse[];
     totalTime: number;
   } | null>(null);
-  
-  // Try to get data from location.state or localStorage
-  let locationState = location.state as LocationState | undefined;
-  
-  if (!locationState || !locationState.companyName || !locationState.jobTitle) {
-    const stored = localStorage.getItem('testData');
-    if (stored) {
-      locationState = JSON.parse(stored) as LocationState;
-    }
-  }
 
-  if (!locationState || !locationState.companyName || !locationState.jobTitle) {
-    navigate('/start-practice', { replace: true });
-    return null;
-  }
+  useSEO({
+    title: session ? `${session.jobTitle} interview · Sapphhire` : "AI Video Interview · Sapphhire",
+    description: "Practise live AI video interviews tailored to your target role.",
+  });
+
+  if (!session) return null;
 
   const handleInterviewComplete = (responses: InterviewResponse[], totalTime: number) => {
     setInterviewResults({ responses, totalTime });
@@ -54,8 +40,8 @@ const AIVideoInterview = () => {
         <AIInterviewResults
           responses={interviewResults.responses}
           totalTime={interviewResults.totalTime}
-          companyName={locationState.companyName}
-          jobTitle={locationState.jobTitle}
+          companyName={session.companyName}
+          jobTitle={session.jobTitle}
         />
       </div>
     );
@@ -63,8 +49,8 @@ const AIVideoInterview = () => {
 
   return (
     <AIInterviewSession
-      companyName={locationState.companyName}
-      jobTitle={locationState.jobTitle}
+      companyName={session.companyName}
+      jobTitle={session.jobTitle}
       onInterviewComplete={handleInterviewComplete}
     />
   );

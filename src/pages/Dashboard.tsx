@@ -10,8 +10,13 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PageHeader from "@/components/PageHeader";
+import { useSEO } from "@/hooks/useSEO";
 
 const Dashboard = () => {
+  useSEO({
+    title: "Dashboard · Sapphhire",
+    description: "Your interview practice dashboard with analytics, history, and quick actions.",
+  });
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();

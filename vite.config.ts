@@ -26,5 +26,10 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: true,
     sourcemap: false,
     minify: true,
+  },
+  esbuild: {
+    // Strip console.log/debug calls in production builds (keep warn/error)
+    drop: mode === 'production' ? ['debugger'] : [],
+    pure: mode === 'production' ? ['console.log', 'console.debug', 'console.info'] : [],
   }
 }));

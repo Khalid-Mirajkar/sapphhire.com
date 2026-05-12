@@ -1,7 +1,9 @@
 
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMCQTest } from '@/hooks/useMCQTest';
+import { useTestSession } from '@/hooks/useTestSession';
+import { useSEO } from '@/hooks/useSEO';
 import MCQQuestionDisplay from '@/components/MCQQuestionDisplay';
 import MCQTestResults from '@/components/MCQTestResults';
 import MCQTestLoading from '@/components/MCQTestLoading';
@@ -11,46 +13,16 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import PageHeader from '@/components/PageHeader';
 
-// Define TypeScript interface for location state
-interface LocationState {
-  companyName: string;
-  jobTitle: string;
-  companyLogo?: string;
-  numberOfQuestions?: string;
-}
-
 const MCQTest: React.FC = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  
-  // Try to get data from location.state or localStorage
-  let locationState = location.state as LocationState | undefined;
-  
-  if (!locationState || !locationState.companyName || !locationState.jobTitle) {
-    const stored = localStorage.getItem('testData');
-    if (stored) {
-      locationState = JSON.parse(stored) as LocationState;
-    }
-  }
-  
-  const companyName = locationState?.companyName;
-  const jobTitle = locationState?.jobTitle;
-  
-  // Redirect to start-practice if no data is available
-  useEffect(() => {
-    if (!companyName || !jobTitle) {
-      navigate('/start-practice', { replace: true });
-    }
-  }, [companyName, jobTitle, navigate]);
+  const { data: session } = useTestSession();
+  const companyName = session?.companyName;
+  const jobTitle = session?.jobTitle;
 
-  // Clear localStorage after successful load
-  useEffect(() => {
-    if (companyName && jobTitle) {
-      return () => {
-        localStorage.removeItem('testData');
-      };
-    }
-  }, [companyName, jobTitle]);
+  useSEO({
+    title: companyName && jobTitle ? `${jobTitle} MCQ Test · Sapphhire` : "MCQ Test · Sapphhire",
+    description: "Take a tailored multiple-choice interview test for your target role.",
+  });
   
   const {
     questions,
